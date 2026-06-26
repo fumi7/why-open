@@ -221,6 +221,8 @@
     text-decoration: underline; text-underline-offset: 3px;
   }
 
+  .version { text-align: center; font-size: 10px; color: #444; margin-top: 24px; }
+
   @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 </style>
 </head>
@@ -384,6 +386,7 @@ function renderQuestion() {
     <div class="reasons" id="reasons-list"></div>
     <div class="q-note">ひとつ選ぶと記録を開始してXへ飛びます</div>
     <div class="stats-link"><button id="btn-stats">統計を見る</button></div>
+    <div class="version">v1.0.0</div>
   `;
 
   // 手動終了ボタン
