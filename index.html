@@ -21,7 +21,6 @@
     --sub: #888;
     --red: #e05555;
     --green: #4caf82;
-    --accent: #e05555;
   }
 
   body {
@@ -37,8 +36,7 @@
 
   .app { width: 100%; max-width: 420px; }
 
-  /* ===== QUESTION SCREEN ===== */
-  .question-screen { animation: fadeIn .25s ease; }
+  .question-screen, .stats-screen { animation: fadeIn .25s ease; }
 
   .q-header {
     display: flex;
@@ -67,26 +65,28 @@
     display: flex; align-items: center; justify-content: center;
     color: var(--sub);
   }
-  .q-header-text h1 {
-    font-size: 13px;
-    color: var(--sub);
-    font-weight: 400;
-  }
-  .q-header-text h2 {
-    font-size: 15px;
-    font-weight: 600;
-  }
+  .q-header-text h1 { font-size: 13px; color: var(--sub); font-weight: 400; }
+  .q-header-text h2 { font-size: 15px; font-weight: 600; }
 
-  .q-title {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    line-height: 1.3;
+  .q-stats { font-size: 12px; color: var(--red); margin-bottom: 12px; }
+
+  /* 直前セッション表示 */
+  .last-session {
+    background: #1a2a1a;
+    border: 1px solid #2a4a2a;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #7fc87f;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  .q-stats {
-    font-size: 12px;
-    color: var(--red);
-    margin-bottom: 28px;
+  .last-session.bad {
+    background: #2a1515;
+    border-color: #4a2020;
+    color: #f08080;
   }
 
   .reasons { display: flex; flex-direction: column; gap: 10px; }
@@ -107,188 +107,118 @@
     font-family: inherit;
   }
   .reason-btn:hover { background: #252525; border-color: #444; }
-  .reason-btn .dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
+  .reason-btn .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
   .dot.bad  { background: var(--red); }
   .dot.good { background: var(--green); }
   .reason-label { flex: 1; }
   .reason-tag {
-    font-size: 10px;
-    padding: 2px 7px;
-    border-radius: 4px;
-    color: #fff;
-    opacity: .7;
+    font-size: 10px; padding: 2px 7px;
+    border-radius: 4px; color: #fff; opacity: .7;
   }
   .tag-bad  { background: var(--red); }
   .tag-good { background: var(--green); }
 
-  .q-note {
-    text-align: center;
-    font-size: 11px;
-    color: #555;
-    margin-top: 16px;
-  }
+  .q-note { text-align: center; font-size: 11px; color: #555; margin-top: 16px; }
 
-  /* ===== STATS SCREEN ===== */
-  .stats-screen { animation: fadeIn .25s ease; }
-
-  .stats-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  /* 計測中バナー */
+  .measuring-banner {
+    background: #1a1a2a;
+    border: 1px solid #2a2a5a;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #8888f0;
     margin-bottom: 20px;
+    line-height: 1.6;
   }
-  .stats-header h2 { font-size: 18px; font-weight: 700; }
-  .back-btn {
-    background: var(--card);
-    border: 1px solid var(--border);
+  .measuring-banner strong { font-size: 18px; font-weight: 700; color: #aaaaff; }
+  .stop-btn {
+    margin-top: 10px;
+    width: 100%;
+    background: #2a2a4a;
+    border: 1px solid #4a4a8a;
     border-radius: 8px;
-    padding: 6px 14px;
-    color: var(--sub);
-    font-size: 12px;
+    padding: 9px;
+    color: #aaaaff;
+    font-size: 13px;
     cursor: pointer;
     font-family: inherit;
   }
 
+  /* STATS */
+  .stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .stats-header h2 { font-size: 18px; font-weight: 700; }
+  .back-btn {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 14px;
+    color: var(--sub); font-size: 12px; cursor: pointer; font-family: inherit;
+  }
+
   .waste-bar-wrap { margin-bottom: 20px; }
-  .bar-track {
-    height: 10px;
-    background: var(--green);
-    border-radius: 5px;
-    overflow: hidden;
-    margin-bottom: 6px;
-  }
-  .bar-fill {
-    height: 100%;
-    background: var(--red);
-    border-radius: 5px;
-    transition: width .6s ease;
-  }
-  .bar-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    color: var(--sub);
-  }
+  .bar-track { height: 10px; background: var(--green); border-radius: 5px; overflow: hidden; margin-bottom: 6px; }
+  .bar-fill { height: 100%; background: var(--red); border-radius: 5px; transition: width .6s ease; }
+  .bar-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--sub); }
 
   .stats-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
   .stat-row {
-    background: var(--card);
-    border-radius: 10px;
-    padding: 12px 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    background: var(--card); border-radius: 10px; padding: 12px 14px;
+    display: flex; align-items: center; gap: 10px;
   }
   .stat-row .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
   .stat-name { flex: 1; font-size: 14px; }
-  .stat-tag {
-    font-size: 10px;
-    padding: 1px 6px;
-    border-radius: 4px;
-    color: #fff;
-    opacity: .7;
-  }
+  .stat-tag { font-size: 10px; padding: 1px 6px; border-radius: 4px; color: #fff; opacity: .7; }
   .stat-count { font-size: 14px; font-weight: 700; color: var(--red); min-width: 48px; text-align: right; }
   .stat-count.good-color { color: var(--green); }
 
   .waste-callout {
-    background: #2a1515;
-    border: 1px solid #5a2020;
-    border-radius: 12px;
-    padding: 14px 16px;
-    font-size: 13px;
-    color: #f08080;
-    line-height: 1.6;
+    background: #2a1515; border: 1px solid #5a2020;
+    border-radius: 12px; padding: 14px 16px;
+    font-size: 13px; color: #f08080; line-height: 1.6;
   }
   .waste-callout strong { font-size: 22px; font-weight: 800; }
 
-  .stats-footer {
-    margin-top: 16px;
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-  }
+  .stats-footer { margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end; }
   .reset-btn {
-    background: transparent;
-    border: 1px solid #444;
-    border-radius: 8px;
-    padding: 7px 14px;
-    color: #666;
-    font-size: 12px;
-    cursor: pointer;
-    font-family: inherit;
+    background: transparent; border: 1px solid #444;
+    border-radius: 8px; padding: 7px 14px;
+    color: #666; font-size: 12px; cursor: pointer; font-family: inherit;
   }
   .reset-btn:hover { color: var(--red); border-color: var(--red); }
 
-  /* ===== SETTINGS MODAL ===== */
+  /* MODAL */
   .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,.7);
+    position: fixed; inset: 0; background: rgba(0,0,0,.7);
     display: flex; align-items: center; justify-content: center;
-    z-index: 100;
-    animation: fadeIn .15s ease;
+    z-index: 100; animation: fadeIn .15s ease;
   }
   .modal {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 24px;
-    width: 320px;
-    max-width: 90vw;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px; width: 320px; max-width: 90vw;
   }
   .modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
   .modal label { font-size: 12px; color: var(--sub); display: block; margin-bottom: 5px; }
-  .modal input, .modal select {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 9px 12px;
-    color: var(--text);
-    font-size: 14px;
-    font-family: inherit;
-    margin-bottom: 14px;
+  .modal input {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 12px; color: var(--text);
+    font-size: 14px; font-family: inherit; margin-bottom: 14px;
   }
   .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
   .modal-cancel {
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 16px;
-    color: var(--sub);
-    font-size: 13px;
-    cursor: pointer;
-    font-family: inherit;
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 16px; color: var(--sub);
+    font-size: 13px; cursor: pointer; font-family: inherit;
   }
   .modal-save {
-    background: var(--red);
-    border: none;
-    border-radius: 8px;
-    padding: 8px 16px;
-    color: #fff;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
+    background: var(--red); border: none; border-radius: 8px;
+    padding: 8px 16px; color: #fff; font-size: 13px;
+    font-weight: 600; cursor: pointer; font-family: inherit;
   }
 
-  .stats-link {
-    text-align: center;
-    margin-top: 20px;
-  }
+  .stats-link { text-align: center; margin-top: 20px; }
   .stats-link button {
-    background: transparent;
-    border: none;
-    color: var(--sub);
-    font-size: 12px;
-    cursor: pointer;
-    font-family: inherit;
-    text-decoration: underline;
-    text-underline-offset: 3px;
+    background: transparent; border: none; color: var(--sub);
+    font-size: 12px; cursor: pointer; font-family: inherit;
+    text-decoration: underline; text-underline-offset: 3px;
   }
 
   @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
@@ -298,15 +228,14 @@
 <div class="app" id="app"></div>
 
 <script>
-// ===== STATE =====
-const STORAGE_KEY = 'why-open-v1';
+const STORAGE_KEY = 'why-open-v2';
 
 const DEFAULT_REASONS = [
-  { id: 'r1', label: '暇つぶし',   tag: '無意識', good: false },
-  { id: 'r2', label: 'なんとなく', tag: '無意識', good: false },
-  { id: 'r3', label: '仕事で',     tag: '目的あり', good: true },
-  { id: 'r4', label: '調べ物',     tag: '目的あり', good: true },
-  { id: 'r5', label: '逃避',       tag: '無意識', good: false },
+  { id: 'r1', label: '暇つぶし',   tag: '無意識',   good: false },
+  { id: 'r2', label: 'なんとなく', tag: '無意識',   good: false },
+  { id: 'r3', label: '仕事で',     tag: '目的あり', good: true  },
+  { id: 'r4', label: '調べ物',     tag: '目的あり', good: true  },
+  { id: 'r5', label: '逃避',       tag: '無意識',   good: false },
 ];
 
 function loadState() {
@@ -323,7 +252,10 @@ function loadState() {
     todayMinutes: 0,
     totalCount: 0,
     totalMinutes: 0,
-    log: {},   // { reasonId: { count, minutes } }
+    log: {},
+    // 計測中セッション
+    measuringReasonId: null,
+    measuringStart: null,
   };
 }
 
@@ -332,14 +264,12 @@ function saveState(st) {
 }
 
 let state = loadState();
-let screen = 'question'; // 'question' | 'stats'
+let screen = 'question';
 let showSettings = false;
-let sessionStart = Date.now();
+let lastSessionMinutes = null; // 戻ってきたとき表示用
 
 // ===== HELPERS =====
-function todayStr() {
-  return new Date().toISOString().slice(0,10);
-}
+function todayStr() { return new Date().toISOString().slice(0,10); }
 
 function ensureToday() {
   const today = todayStr();
@@ -350,22 +280,26 @@ function ensureToday() {
   }
 }
 
-function elapsedMinutes() {
-  return Math.max(1, Math.round((Date.now() - sessionStart) / 60000));
+function formatMin(m) {
+  m = Math.round(m);
+  if (m < 1) return '1分未満';
+  if (m < 60) return m + '分';
+  return Math.floor(m/60) + '時間' + (m%60 ? (m%60) + '分' : '');
 }
 
-function recordReason(reasonId) {
+function commitSession(mins) {
   ensureToday();
-  const mins = elapsedMinutes();
+  const rid = state.measuringReasonId;
   state.todayCount++;
   state.todayMinutes += mins;
   state.totalCount++;
   state.totalMinutes += mins;
-  if (!state.log[reasonId]) state.log[reasonId] = { count: 0, minutes: 0 };
-  state.log[reasonId].count++;
-  state.log[reasonId].minutes += mins;
+  if (!state.log[rid]) state.log[rid] = { count: 0, minutes: 0 };
+  state.log[rid].count++;
+  state.log[rid].minutes += mins;
+  state.measuringReasonId = null;
+  state.measuringStart = null;
   saveState(state);
-  sessionStart = Date.now();
 }
 
 function wastePercent() {
@@ -377,25 +311,30 @@ function wastePercent() {
   return Math.round(bad / total * 100);
 }
 
-function formatMin(m) {
-  if (m < 60) return m + '分';
-  return Math.floor(m/60) + '時間' + (m%60 ? (m%60) + '分' : '');
+// ===== 計測中セッションがあれば戻ってきたと判断 =====
+function checkReturn() {
+  if (state.measuringStart && state.measuringReasonId) {
+    const elapsed = (Date.now() - state.measuringStart) / 60000;
+    lastSessionMinutes = Math.max(1, Math.round(elapsed));
+    commitSession(lastSessionMinutes);
+  }
 }
+
+// ページが再び見えたとき（Xから戻ってきたとき）
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    checkReturn();
+    render();
+  }
+});
 
 // ===== RENDER =====
 function render() {
   const app = document.getElementById('app');
   app.innerHTML = '';
-
-  if (showSettings) {
-    app.appendChild(renderSettingsModal());
-  }
-
-  if (screen === 'question') {
-    app.appendChild(renderQuestion());
-  } else {
-    app.appendChild(renderStats());
-  }
+  if (showSettings) app.appendChild(renderSettingsModal());
+  if (screen === 'question') app.appendChild(renderQuestion());
+  else app.appendChild(renderStats());
 }
 
 function renderQuestion() {
@@ -403,10 +342,36 @@ function renderQuestion() {
   const div = document.createElement('div');
   div.className = 'question-screen';
 
+  // 計測中かどうかで表示を分岐
+  const isMeasuring = !!(state.measuringStart && state.measuringReasonId);
+  const elapsedNow = isMeasuring
+    ? Math.max(1, Math.round((Date.now() - state.measuringStart) / 60000))
+    : 0;
+
+  let topBlock = '';
+  if (lastSessionMinutes !== null) {
+    const reason = state.reasons.find(r => r.id === state.measuringReasonId) ||
+                   { good: false, label: '' };
+    // measuringReasonIdはcommit後nullになるので直前のものをlastSessionReasonIdで保持
+    const isBad = lastSessionReasonGood === false;
+    topBlock = `
+      <div class="last-session ${isBad ? 'bad' : ''}">
+        ⏱ さっきは <strong>${formatMin(lastSessionMinutes)}</strong> 使いました
+        ${isBad ? '。本当に必要だった？' : '。お疲れ様でした。'}
+      </div>`;
+  } else if (isMeasuring) {
+    topBlock = `
+      <div class="measuring-banner">
+        ⏱ 計測中… <strong>${formatMin(elapsedNow)}</strong> 経過<br>
+        <small style="color:#8888cc">Xを使い終わったらこのページに戻ってください</small>
+        <button class="stop-btn" id="btn-stop">今すぐ記録して終了</button>
+      </div>`;
+  }
+
   div.innerHTML = `
     <div class="q-header">
       <div class="app-icon" id="btn-settings">
-        <span id="emoji-display">${state.appEmoji}</span>
+        <span>${state.appEmoji}</span>
         <span class="app-icon-edit">✎</span>
       </div>
       <div class="q-header-text">
@@ -415,10 +380,21 @@ function renderQuestion() {
       </div>
     </div>
     <div class="q-stats">● 今日 ${state.todayCount}回目・累計 ${formatMin(state.todayMinutes)}</div>
+    ${topBlock}
     <div class="reasons" id="reasons-list"></div>
-    <div class="q-note">ひとつ選ぶと記録されます</div>
+    <div class="q-note">ひとつ選ぶと記録を開始してXへ飛びます</div>
     <div class="stats-link"><button id="btn-stats">統計を見る</button></div>
   `;
+
+  // 手動終了ボタン
+  const stopBtn = div.querySelector('#btn-stop');
+  if (stopBtn) {
+    stopBtn.onclick = () => {
+      checkReturn();
+      lastSessionMinutes = lastSessionMinutes; // 維持
+      render();
+    };
+  }
 
   const list = div.querySelector('#reasons-list');
   state.reasons.forEach(r => {
@@ -430,12 +406,21 @@ function renderQuestion() {
       <span class="reason-tag ${r.good ? 'tag-good' : 'tag-bad'}">${r.tag}</span>
     `;
     btn.onclick = () => {
-      recordReason(r.id);
-      // Xアプリへ飛ぶ（インストール済みならアプリ、なければブラウザ版）
-      window.location.href = 'twitter://';
-      setTimeout(() => {
-        window.location.href = 'https://x.com';
-      }, 800);
+      // 前のセッションが残っていたら先にコミット
+      if (state.measuringStart && state.measuringReasonId) checkReturn();
+      // 新しいセッション開始
+      state.measuringReasonId = r.id;
+      state.measuringStart = Date.now();
+      lastSessionReasonGood = r.good;
+      lastSessionMinutes = null;
+      saveState(state);
+      // Xへ飛ぶ
+      const a = document.createElement('a');
+      a.href = 'intent://twitter.com/#Intent;scheme=https;package=com.twitter.android;S.browser_fallback_url=https://x.com;end';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => document.body.removeChild(a), 1000);
       render();
     };
     list.appendChild(btn);
@@ -456,7 +441,7 @@ function renderStats() {
     .filter(r => !r.good)
     .reduce((s,r) => s + (state.log[r.id]?.minutes || 0), 0);
 
-  let rows = state.reasons.map(r => {
+  const rows = state.reasons.map(r => {
     const entry = state.log[r.id] || { count: 0, minutes: 0 };
     return { ...r, count: entry.count, minutes: entry.minutes };
   }).sort((a,b) => b.count - a.count);
@@ -489,7 +474,10 @@ function renderStats() {
       <span class="dot ${r.good ? 'good' : 'bad'}"></span>
       <span class="stat-name">${r.label}</span>
       <span class="stat-tag ${r.good ? 'tag-good' : 'tag-bad'}">${r.tag}</span>
-      <span class="stat-count ${r.good ? 'good-color' : ''}">${r.count}回<br><small style="font-size:11px;font-weight:400;color:#888">${formatMin(r.minutes)}</small></span>
+      <span class="stat-count ${r.good ? 'good-color' : ''}">
+        ${r.count}回<br>
+        <small style="font-size:11px;font-weight:400;color:#888">${formatMin(r.minutes)}</small>
+      </span>
     `;
     list.appendChild(row);
   });
@@ -500,6 +488,8 @@ function renderStats() {
       state.log = {};
       state.todayCount = 0; state.todayMinutes = 0;
       state.totalCount = 0; state.totalMinutes = 0;
+      state.measuringReasonId = null; state.measuringStart = null;
+      lastSessionMinutes = null;
       saveState(state);
       render();
     }
@@ -511,7 +501,6 @@ function renderStats() {
 function renderSettingsModal() {
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
-
   overlay.innerHTML = `
     <div class="modal">
       <h3>⚙ 設定</h3>
@@ -525,7 +514,6 @@ function renderSettingsModal() {
       </div>
     </div>
   `;
-
   overlay.querySelector('#set-cancel').onclick = () => { showSettings = false; render(); };
   overlay.querySelector('#set-save').onclick = () => {
     const name = overlay.querySelector('#set-name').value.trim();
@@ -537,11 +525,13 @@ function renderSettingsModal() {
     render();
   };
   overlay.onclick = (e) => { if (e.target === overlay) { showSettings = false; render(); } };
-
   return overlay;
 }
 
 // ===== BOOT =====
+let lastSessionReasonGood = null;
+// 起動時にも未コミットセッションがあれば処理
+checkReturn();
 render();
 </script>
 </body>
