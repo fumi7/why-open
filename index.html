@@ -317,6 +317,12 @@ async function flush(force) {
   finally { clearTimeout(timer); flushing = false; }
 }
 
+async function syncNow(b) {
+  b.textContent = '同期中…';
+  const ok = await flush(true);
+  b.textContent = ok === null ? '未設定（⚙で入力）' : ok ? '同期済み ✓' : '失敗（後で再試行）';
+}
+
 // ===== グラフ =====
 function chart(vals, labels, fmt) {
   const mx = Math.max(1, ...vals);
@@ -458,8 +464,8 @@ function renderQuestion() {
     <input class="memo" id="memo-before" placeholder="メモ（任意）">
     <div class="reasons" id="reasons-list"></div>
     <div class="q-note">ひとつ選ぶと記録を開始してXへ飛びます</div>
-    <div class="stats-link"><button id="btn-stats">統計を見る</button></div>
-    <div class="version">v1.1.0</div>
+    <div class="stats-link"><button id="btn-stats">統計を見る</button>　<button id="btn-sync-q">今すぐ同期</button></div>
+    <div class="version">v1.2.0</div>
   `;
 
   // 手動終了ボタン
@@ -512,6 +518,7 @@ function renderQuestion() {
 
   div.querySelector('#btn-settings').onclick = () => { showSettings = true; render(); };
   div.querySelector('#btn-stats').onclick = () => { screen = 'stats'; render(); };
+  div.querySelector('#btn-sync-q').onclick = (e) => syncNow(e.target);
 
   return div;
 }
@@ -569,11 +576,7 @@ function renderStats() {
   });
 
   div.querySelector('#btn-back').onclick = () => { screen = 'question'; render(); };
-  div.querySelector('#btn-sync').onclick = async (e) => {
-    const b = e.target; b.textContent = '同期中…';
-    const ok = await flush(true);
-    b.textContent = ok === null ? '未設定（⚙で入力）' : ok ? '同期済み ✓' : '失敗（後で再試行）';
-  };
+  div.querySelector('#btn-sync').onclick = (e) => syncNow(e.target);
   div.querySelector('#btn-reset').onclick = () => {
     if (confirm('統計データをすべて削除しますか？')) {
       state.log = {};
