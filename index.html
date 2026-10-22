@@ -221,6 +221,14 @@
     text-decoration: underline; text-underline-offset: 3px;
   }
 
+  .memo { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; color: var(--text); font-size: 13px; font-family: inherit; margin-bottom: 12px; }
+  .chart-box { background: var(--card); border-radius: 10px; padding: 12px 14px; margin-top: 14px; }
+  .chart-box h3 { font-size: 12px; color: var(--sub); font-weight: 400; margin-bottom: 8px; }
+  .chart { display: flex; gap: 2px; align-items: flex-end; }
+  .chart .col { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
+  .chart i { display: block; width: 100%; background: var(--red); border-radius: 2px 2px 0 0; min-height: 1px; }
+  .chart small { font-size: 9px; color: var(--sub); }
+  .chart em { font-size: 9px; color: #666; font-style: normal; height: 13px; }
   .version { text-align: center; font-size: 10px; color: #444; margin-top: 24px; }
 
   @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
@@ -266,12 +274,68 @@ function saveState(st) {
 }
 
 let state = loadState();
+state.sessions = state.sessions || [];
+state.sync = state.sync || { url: '', key: '' };
 let screen = 'question';
 let showSettings = false;
 let lastSessionMinutes = null; // 戻ってきたとき表示用
 
 // ===== HELPERS =====
-function todayStr() { return new Date().toISOString().slice(0,10); }
+function localDate(d = new Date()) {
+  const p = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+}
+function todayStr() { return localDate(); }
+function newId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function esc(s) { return String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+// ===== 同期（Apps Script）: 未送信は端末に溜め、通信できるときにまとめて送る =====
+const SETTLE_MS = 10 * 60 * 1000; // 戻ってからメモを足せる猶予
+let flushing = false;
+let lastSessionId = null;
+async function flush(force) {
+  const { url, key } = state.sync;
+  if (!url || !key) return null;
+  if (flushing) return false;
+  const rows = state.sessions.filter(s => !s.synced && (force || Date.now() - s.at > SETTLE_MS));
+  if (!rows.length) return true;
+  flushing = true;
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 20000);
+  try {
+    const res = await fetch(url, {
+      method: 'POST', signal: ctl.signal,
+      body: JSON.stringify({ key, rows: rows.map(s => ({ id: s.id, date: s.date, start: s.start, min: s.min, why: s.why, kind: s.kind, memo: s.memo })) })
+    });
+    const j = await res.json();
+    if (!j.ok) return false;
+    const ok = new Set(j.accepted);
+    state.sessions.forEach(s => { if (ok.has(s.id)) s.synced = true; });
+    saveState(state);
+    return true;
+  } catch (e) { return false; }
+  finally { clearTimeout(timer); flushing = false; }
+}
+
+// ===== グラフ =====
+function chart(vals, labels, fmt) {
+  const mx = Math.max(1, ...vals);
+  return '<div class="chart">' + vals.map((v, i) =>
+    `<div class="col"><small>${v ? fmt(v) : ''}</small><i style="height:${Math.round(v / mx * 56)}px"></i><em>${labels[i]}</em></div>`).join('') + '</div>';
+}
+function chartsHtml() {
+  if (!state.sessions.length) return '<div class="q-note">時間帯・日別のグラフは、このバージョン以降の記録から表示されます</div>';
+  const hrs = Array(24).fill(0);
+  state.sessions.forEach(s => hrs[parseInt(s.start)]++);
+  const days = [], mins = [];
+  for (let k = 6; k >= 0; k--) {
+    const d = localDate(new Date(Date.now() - k * 864e5));
+    days.push(d.slice(5).replace('-', '/'));
+    mins.push(state.sessions.filter(s => s.date === d).reduce((a, s) => a + s.min, 0));
+  }
+  return `<div class="chart-box"><h3>起動した時間帯（回数）</h3>${chart(hrs, hrs.map((_, i) => i % 6 ? '' : i), v => v)}</div>
+    <div class="chart-box"><h3>日別の合計時間（直近7日）</h3>${chart(mins, days, v => formatMin(v).replace('時間', 'h').replace('分', 'm'))}</div>`;
+}
 
 function ensureToday() {
   const today = todayStr();
@@ -299,6 +363,12 @@ function commitSession(mins) {
   if (!state.log[rid]) state.log[rid] = { count: 0, minutes: 0 };
   state.log[rid].count++;
   state.log[rid].minutes += mins;
+  const r = state.reasons.find(x => x.id === rid) || {};
+  const d = new Date(state.measuringStart), p = n => String(n).padStart(2, '0');
+  lastSessionId = state.measuringId || newId();
+  state.sessions.push({ id: lastSessionId, date: localDate(d), start: p(d.getHours()) + ':' + p(d.getMinutes()), min: mins, why: r.label || '', kind: r.tag || '', memo: state.measuringMemo || '', at: Date.now(), synced: false });
+  state.measuringId = null;
+  state.measuringMemo = '';
   state.measuringReasonId = null;
   state.measuringStart = null;
   saveState(state);
@@ -327,6 +397,7 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
     checkReturn();
     render();
+    flush(false);
   }
 });
 
@@ -360,7 +431,8 @@ function renderQuestion() {
       <div class="last-session ${isBad ? 'bad' : ''}">
         ⏱ さっきは <strong>${formatMin(lastSessionMinutes)}</strong> 使いました
         ${isBad ? '。本当に必要だった？' : '。お疲れ様でした。'}
-      </div>`;
+      </div>
+      <input class="memo" id="memo-after" placeholder="何を見てた？（任意）" value="${esc((state.sessions.find(x => x.id === lastSessionId) || {}).memo)}">`;
   } else if (isMeasuring) {
     topBlock = `
       <div class="measuring-banner">
@@ -383,10 +455,11 @@ function renderQuestion() {
     </div>
     <div class="q-stats">● 今日 ${state.todayCount}回目・累計 ${formatMin(state.todayMinutes)}</div>
     ${topBlock}
+    <input class="memo" id="memo-before" placeholder="メモ（任意）">
     <div class="reasons" id="reasons-list"></div>
     <div class="q-note">ひとつ選ぶと記録を開始してXへ飛びます</div>
     <div class="stats-link"><button id="btn-stats">統計を見る</button></div>
-    <div class="version">v1.0.0</div>
+    <div class="version">v1.1.0</div>
   `;
 
   // 手動終了ボタン
@@ -398,6 +471,12 @@ function renderQuestion() {
       render();
     };
   }
+
+  const ma = div.querySelector('#memo-after');
+  if (ma) ma.onchange = () => {
+    const s = state.sessions.find(x => x.id === lastSessionId);
+    if (s && !s.synced) { s.memo = ma.value.trim(); saveState(state); }
+  };
 
   const list = div.querySelector('#reasons-list');
   state.reasons.forEach(r => {
@@ -414,6 +493,8 @@ function renderQuestion() {
       // 新しいセッション開始
       state.measuringReasonId = r.id;
       state.measuringStart = Date.now();
+      state.measuringId = newId();
+      state.measuringMemo = div.querySelector('#memo-before').value.trim();
       lastSessionReasonGood = r.good;
       lastSessionMinutes = null;
       saveState(state);
@@ -464,7 +545,9 @@ function renderStats() {
       <strong>${wp}%</strong> が「無意識」の起動。<br>
       累計 ${formatMin(totalBadMin)}、本当に必要だった？
     </div>` : ''}
+    ${chartsHtml()}
     <div class="stats-footer">
+      <button class="reset-btn" id="btn-sync">同期</button>
       <button class="reset-btn" id="btn-reset">データをリセット</button>
     </div>
   `;
@@ -486,12 +569,17 @@ function renderStats() {
   });
 
   div.querySelector('#btn-back').onclick = () => { screen = 'question'; render(); };
+  div.querySelector('#btn-sync').onclick = async (e) => {
+    const b = e.target; b.textContent = '同期中…';
+    const ok = await flush(true);
+    b.textContent = ok === null ? '未設定（⚙で入力）' : ok ? '同期済み ✓' : '失敗（後で再試行）';
+  };
   div.querySelector('#btn-reset').onclick = () => {
     if (confirm('統計データをすべて削除しますか？')) {
       state.log = {};
       state.todayCount = 0; state.todayMinutes = 0;
       state.totalCount = 0; state.totalMinutes = 0;
-      state.measuringReasonId = null; state.measuringStart = null;
+      state.measuringReasonId = null; state.measuringStart = null; state.sessions = [];
       lastSessionMinutes = null;
       saveState(state);
       render();
@@ -511,6 +599,10 @@ function renderSettingsModal() {
       <input id="set-name" type="text" value="${state.appName}" placeholder="例: X, Instagram">
       <label>絵文字アイコン</label>
       <input id="set-emoji" type="text" value="${state.appEmoji}" placeholder="📱" maxlength="2">
+      <label>同期URL（Apps Script）</label>
+      <input id="set-url" type="text" value="${esc(state.sync.url)}" placeholder="https://script.google.com/macros/s/.../exec">
+      <label>同期キー</label>
+      <input id="set-key" type="text" value="${esc(state.sync.key)}">
       <div class="modal-actions">
         <button class="modal-cancel" id="set-cancel">キャンセル</button>
         <button class="modal-save" id="set-save">保存</button>
@@ -523,6 +615,7 @@ function renderSettingsModal() {
     const emoji = overlay.querySelector('#set-emoji').value.trim();
     if (name) state.appName = name;
     if (emoji) state.appEmoji = emoji;
+    state.sync = { url: overlay.querySelector('#set-url').value.trim(), key: overlay.querySelector('#set-key').value.trim() };
     saveState(state);
     showSettings = false;
     render();
@@ -536,6 +629,8 @@ let lastSessionReasonGood = null;
 // 起動時にも未コミットセッションがあれば処理
 checkReturn();
 render();
+flush(false);
+window.addEventListener('online', () => flush(false));
 </script>
 </body>
 </html>
